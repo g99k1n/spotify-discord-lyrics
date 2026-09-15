@@ -1,7 +1,7 @@
 # 🎵 Spotify × Discord Lyrics Sync
 
 <p align="center">
-  <img src="./assets/demo.jpg" alt="Spotify × Discord Lyrics Sync Demo" width="680" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
+  <img src="./assets/demo.gif" alt="Spotify × Discord Lyrics Sync Demo" width="680" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
 </p>
 
 Full-featured application that syncs your active **Spotify** playback and automatically displays synchronized karaoke lyrics in your **Discord Custom Status** in real-time, featuring built-in rate-limit protection.
@@ -35,7 +35,7 @@ Full-featured application that syncs your active **Spotify** playback and automa
 ```
 spotify-discord-lyrics/
 ├── assets/
-│   └── demo.jpg               # Visual demonstration banner
+│   └── demo.gif               # Animated visual demonstration
 ├── backend/
 │   ├── src/
 │   │   ├── config.ts          # Port, token, and throttling configuration
