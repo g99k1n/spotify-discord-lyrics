@@ -1,111 +1,120 @@
 # 🎵 Spotify × Discord Lyrics Sync
 
-Полноценное веб-приложение для синхронизации воспроизведения в **Spotify** и автоматического вывода текущих караоке-строк песен в **Custom Status вашего аккаунта Discord** в реальном времени с защитой от рейт-лимитов.
+<p align="center">
+  <img src="./assets/demo.jpg" alt="Spotify × Discord Lyrics Sync Demo" width="680" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
+</p>
+
+Full-featured application that syncs your active **Spotify** playback and automatically displays synchronized karaoke lyrics in your **Discord Custom Status** in real-time, featuring built-in rate-limit protection.
 
 ---
 
-## 🌟 Возможности проекта
+## 🌟 Key Features
 
-- **Синхронизация в реальном времени (Backend Engine):**
-  - Опрашивает Spotify Web API и точно интерполирует временную шкалу воспроизведения трека (миллисекунды).
-  - Автоматически находит караоке-субтитры (LRC формат с таймкодами) через открытую базу `lrclib.net` без приватных cookies Spotify.
-  - Сопоставляет текущее время с активной строкой песни и отправляет обновление в статус Discord.
-- **Встроенная защита от блокировок и спама Discord (Anti-Rate-Limit):**
-  - Жесткий минимальный интервал между обновлениями — **не чаще 1 раза в 2.5 секунды** (троттлинг).
-  - Автоматическая обрезка длинных строк до 128 символов (лимит Discord) с многоточием `…`.
-  - Автоматический сброс статуса (`custom_status: null`) при нажатии кнопки «Stop Sync», при паузе трека или при закрытии сервера (`SIGINT`/`SIGTERM`).
-- **Стек и Архитектура:**
+- **Real-Time Synchronization Engine (Backend):**
+  - Continuously tracks Spotify playback and precisely interpolates track progress down to the millisecond.
+  - Automatically fetches synced LRC subtitles (with millisecond timestamps) via the public `lrclib.net` database without requiring private Spotify cookies.
+  - Aligns current playback timing with active lyrical lines and dispatches updates to Discord status.
+- **Anti-Rate-Limit Discord Protection:**
+  - Strict minimum update interval — **no more than once every 2.5 seconds** (throttled).
+  - Automatically truncates lines exceeding 128 characters (Discord limit) with an ellipsis `…`.
+  - Automatically resets status (`custom_status: null`) upon clicking "Stop Sync", pausing playback, or server termination (`SIGINT`/`SIGTERM`).
+- **Modern Architecture & Stack:**
   - **Backend:** Node.js, Express, WebSocket (`ws`), TypeScript, Vitest.
-  - **Frontend:** React 18, Vite, TypeScript, Lucide Icons, Vanilla Glassmorphism CSS Dark Theme.
-- **Интерактивный дашборд:**
-  - Красивый плеер с обложкой, названием, исполнителем и анимированным прогресс-баром.
-  - Окно караоке с вертикальной плавной прокруткой и центрированием текущей поющей строки.
-  - Живое превью карточки профиля Discord (аватарка со статусом "в сети" и диалоговое облачко с текущей строчкой).
-  - Регулятор задержки тайминга (кнопки `+200ms` / `-200ms` / сброс) для идеального попадания в ритм.
-  - **Demo Mode (Демо-режим):** работает «из коробки» без обязательного ввода токенов для мгновенной проверки работы караоке и интерфейса!
+  - **Frontend:** React 18, Vite, TypeScript, Lucide Icons, Vanilla Glassmorphism Dark Theme.
+- **Interactive Dashboard:**
+  - Sleek music player card with album art, track title, artist, and animated progress bar.
+  - Karaoke lyrics view with smooth auto-scroll and centering for active lines.
+  - Live Discord profile card preview (avatar with online badge and custom status bubble).
+  - Fine-grained timing latency adjustment (`+200ms` / `-200ms` / reset) for perfect rhythm alignment.
+  - **Demo Mode:** Works out of the box with zero setup required to test the interface and lyrics engine immediately.
 
 ---
 
-## 📁 Структура проекта
+## 📁 Project Structure
 
 ```
 spotify-discord-lyrics/
+├── assets/
+│   └── demo.jpg               # Visual demonstration banner
 ├── backend/
 │   ├── src/
-│   │   ├── config.ts              # Конфигурация портов, лимитов и токенов
+│   │   ├── config.ts          # Port, token, and throttling configuration
 │   │   ├── services/
-│   │   │   ├── lyrics.service.ts  # Парсер LRC и клиент API Lrclib.net с кэшем
-│   │   │   ├── spotify.service.ts # Клиент Spotify API + Demo генератор
-│   │   │   ├── discord.service.ts # Клиент Discord с троттлером (2.5s)
-│   │   │   └── sync.service.ts    # Движок интерполяции времени и караоке
+│   │   │   ├── lyrics.service.ts  # LRC parser & lrclib.net API client with cache
+│   │   │   ├── spotify.service.ts # Spotify Web API client + Demo mock generator
+│   │   │   ├── discord.service.ts # Discord status updater with 2.5s rate-limiter
+│   │   │   └── sync.service.ts    # Millisecond timestamp interpolator & sync loop
 │   │   ├── routes/
 │   │   │   └── api.routes.ts      # REST API (/api/status, /api/sync/toggle, etc.)
 │   │   ├── ws/
-│   │   │   └── socket.ts          # WebSocket сервер для трансляции на фронтенд
-│   │   └── index.ts               # Серверная точка входа
-│   └── tests/                     # 21 юнит и интеграционный тест (Vitest)
+│   │   │   └── socket.ts          # WebSocket server broadcasting live state
+│   │   └── index.ts           # Server entry point
+│   └── tests/                 # 21 unit and integration tests (Vitest)
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Header.tsx         # Навигация, индикаторы подключения и кнопки управления
-│   │   │   ├── PlayerCard.tsx     # Обложка трека, прогресс-бар, кнопки задержки
-│   │   │   ├── LyricsView.tsx     # Караоке-вьювер с автоскроллом активной строки
-│   │   │   ├── DiscordPreview.tsx # Превью карточки профиля Discord вживую
-│   │   │   └── SettingsModal.tsx  # Модальное окно настроек токенов и префиксов
+│   │   │   ├── Header.tsx         # Navigation, connection badges, and sync toggle
+│   │   │   ├── PlayerCard.tsx     # Track info, cover art, seek bar, latency offset
+│   │   │   ├── LyricsView.tsx     # Karaoke scrolling lyrics viewport
+│   │   │   ├── DiscordPreview.tsx # Live simulated Discord user profile card
+│   │   │   └── SettingsModal.tsx  # Token and configuration dialog
 │   │   ├── hooks/
-│   │   │   └── useSyncSocket.ts   # WebSocket хук для связи с сервером
+│   │   │   └── useSyncSocket.ts   # WebSocket connection hook
 │   │   ├── App.tsx
-│   │   └── index.css              # Дизайн-система (Glassmorphism, Neon Green & Blurple)
+│   │   └── index.css          # Glassmorphism design system (Dark Neon Theme)
 │
-├── package.json                   # Корневой скрипт одновременного запуска
+├── package.json               # Root monorepo runner scripts
 └── README.md
 ```
 
 ---
 
-## 🚀 Быстрый запуск
+## 🚀 Quick Start
 
-### 1. Запуск в режиме разработки (Backend + Frontend)
-В корневой папке проекта выполните:
+### 1. Run Development Server (Backend + Frontend)
+
+In the root directory of the project, execute:
+
 ```bash
 npm run dev
 ```
-Команда автоматически запустит:
+
+This will concurrently launch:
 - **Backend API & WebSocket:** `http://localhost:3001`
 - **Frontend Dashboard:** `http://localhost:5173`
 
-Откройте в браузере: **`http://localhost:5173`**
+Open in your browser: **`http://localhost:5173`**
 
-По умолчанию включен **Demo Mode**: сразу запустится симулированный трек *Rick Astley — Never Gonna Give You Up* с синхронными караоке-субтитрами и живым отображением статуса в карточке Discord!
+By default, **Demo Mode** is enabled: a simulated track (*Rick Astley — Never Gonna Give You Up*) starts playing with synchronized karaoke lyrics and live updates in the Discord preview card.
 
 ---
 
-## ⚙️ Подключение вашего Discord и Spotify
+## ⚙️ Connecting Discord & Spotify
 
-Нажмите кнопку **Settings** в правом верхнем углу интерфейса:
+Click the **Settings** button in the top right corner of the dashboard:
 
 1. **Discord User Token:**
-   - Откройте Discord в браузере (`discord.com/app`).
-   - Нажмите `Ctrl + Shift + I` (Инструменты разработчика) -> вкладка **Network** (Сеть).
-   - Совершите любое действие (например, отправьте сообщение или перейдите в канал).
-   - Найдите запрос к API Discord (например, `/messages` или `/users/@me`) и в заголовках запроса (`Request Headers`) найдите заголовок `Authorization`.
-   - Скопируйте значение этого токена и вставьте в поле **Discord User Token** в настройках приложения.
-   - *Токен сохраняется исключительно локально на вашем компьютере.*
+   - Open Discord in your web browser (`discord.com/app`).
+   - Press `Ctrl + Shift + I` (Developer Tools) -> **Network** tab.
+   - Perform any action (send a message or switch channels).
+   - Filter by `/messages` or `/users/@me` and find the `Authorization` header under **Request Headers**.
+   - Copy the token value and paste it into the **Discord User Token** field in Settings.
+   - *Tokens are stored strictly locally on your machine.*
 
-2. **Spotify API Credentials (для Live-режима):**
-   - Перейдите на [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
-   - Создайте приложение (App) и получите **Client ID** и **Client Secret**.
-   - Добавьте в `Redirect URIs` адрес: `http://127.0.0.1:3001/api/auth/spotify/callback`.
+2. **Spotify API Credentials (for Live Sync):**
+   - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+   - Create an application and copy your **Client ID** and **Client Secret**.
+   - Add `http://127.0.0.1:3001/api/auth/spotify/callback` to **Redirect URIs** in your Spotify app settings.
 
 ---
 
-## 🧪 Запуск тестов
+## 🧪 Running Tests
 
-Тесты покрывают парсер LRC, проверку троттлинга Discord (2500ms), поиск строк по таймкодам и REST API:
+The test suite covers the LRC parser, Discord rate-limiting throttler (2500ms safety delay), timecode line indexing, and API routes:
 
 ```bash
 npm run test:backend
 ```
 
-Все 21 теста выполняются с помощью `vitest`.
+All 21 tests are executed with `vitest`.

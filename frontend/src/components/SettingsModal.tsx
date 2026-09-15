@@ -202,7 +202,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onChange={(e) => setSpotifyRefreshToken(e.target.value)}
               />
               <span className="help-text">
-                Если у вас есть Refresh Token, просто вставьте его сюда и нажмите «Save Settings».
+                If you have a Refresh Token, paste it here and click "Save Settings".
               </span>
             </div>
           </div>
